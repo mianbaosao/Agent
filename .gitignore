@@ -1,0 +1,8 @@
+node_modules
+.next
+frontend/.next
+frontend/tsconfig.tsbuildinfo
+*.log
+.env
+.env.local
+target
