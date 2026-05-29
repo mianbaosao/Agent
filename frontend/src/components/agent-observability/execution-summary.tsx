@@ -1,6 +1,7 @@
 "use client";
 
 import { Cpu, Gauge, Radio, Timer } from "lucide-react";
+import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { formatDuration } from "@/lib/utils";
 import type { TaskTrace } from "@/types/agent-observability";
@@ -27,6 +28,12 @@ export function ExecutionSummary({ task, connectionState }: ExecutionSummaryProp
               <Radio className="h-3.5 w-3.5" />
               {connectionState === "mock" ? "Mock Stream" : connectionState}
             </span>
+            <Link
+              href="/planner"
+              className="inline-flex h-8 items-center rounded-md border border-[#b9c2d1] bg-white/65 px-3 text-sm font-medium text-[#26324a] transition hover:bg-[#f4f6f9]"
+            >
+              AI目标规划
+            </Link>
           </div>
           <p className="mt-1 text-sm leading-5 text-[#566178]">{task.objective}</p>
         </div>
