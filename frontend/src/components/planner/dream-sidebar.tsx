@@ -3,10 +3,8 @@
 import {
   BarChart3,
   Bot,
-  CalendarDays,
-  CalendarRange,
+  BriefcaseBusiness,
   Home,
-  Settings,
   Sun,
   Target,
 } from "lucide-react";
@@ -17,16 +15,13 @@ const navItems: Array<{
   id: PlannerView;
   label: string;
   icon: typeof Home;
-  emoji: string;
 }> = [
-  { id: "overview", label: "总览", icon: Home, emoji: "🏠" },
-  { id: "yearly", label: "年度目标", icon: Target, emoji: "🎯" },
-  { id: "monthly", label: "月度规划", icon: CalendarRange, emoji: "📅" },
-  { id: "weekly", label: "周计划", icon: CalendarDays, emoji: "🗓️" },
-  { id: "today", label: "今日任务", icon: Sun, emoji: "☀️" },
-  { id: "ai", label: "AI规划师", icon: Bot, emoji: "🤖" },
-  { id: "stats", label: "成长统计", icon: BarChart3, emoji: "📈" },
-  { id: "settings", label: "设置", icon: Settings, emoji: "⚙️" },
+  { id: "overview", label: "总览", icon: Home },
+  { id: "today", label: "每日任务", icon: Sun },
+  { id: "yearly", label: "年度计划", icon: Target },
+  { id: "stats", label: "统计", icon: BarChart3 },
+  { id: "tools", label: "日常工具", icon: BriefcaseBusiness },
+  { id: "agent", label: "Agent", icon: Bot },
 ];
 
 export function DreamSidebar() {
@@ -36,7 +31,7 @@ export function DreamSidebar() {
     <aside className="flex h-20 shrink-0 border-b border-[#DDEBD8] bg-[#FFFDF7]/95 px-4 shadow-sm lg:h-screen lg:w-72 lg:flex-col lg:border-b-0 lg:border-r">
       <div className="hidden border-b border-[#E8F3E3] px-2 py-5 lg:block">
         <div className="text-lg font-bold text-[#2E4B36]">Dream Trail</div>
-        <div className="mt-1 text-xs text-[#6D7B67]">一整年的目标陪伴系统</div>
+        <div className="mt-1 text-xs text-[#6D7B67]">每日行动与年度计划</div>
       </div>
 
       <nav className="flex min-w-0 flex-1 items-center gap-2 overflow-x-auto py-3 lg:block lg:space-y-1 lg:overflow-visible lg:px-3">
@@ -54,7 +49,6 @@ export function DreamSidebar() {
               )}
               onClick={() => setActiveView(item.id)}
             >
-              <span aria-hidden>{item.emoji}</span>
               <Icon className="h-4 w-4 shrink-0" />
               <span className="whitespace-nowrap">{item.label}</span>
             </button>

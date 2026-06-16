@@ -42,6 +42,7 @@ export interface ScheduleTask {
   status: string;
   due_date?: string | null;
   start_time?: string | null;
+  sort_order?: number;
   children?: ScheduleTask[];
 }
 
@@ -54,4 +55,41 @@ export interface ScheduleTaskInput {
   due_date?: string | null;
   start_time?: string | null;
   sort_order?: number;
+}
+
+export type ToolGroupId = "learning" | "work" | "search" | "utility";
+
+export interface ToolLink {
+  id: number;
+  group_id: ToolGroupId;
+  label: string;
+  href: string;
+  sort_order?: number;
+}
+
+export interface ToolLinkInput {
+  group_id: ToolGroupId;
+  label: string;
+  href: string;
+  sort_order?: number;
+}
+
+export interface SiteAgentRequest {
+  message: string;
+  date: string;
+}
+
+export interface SiteAgentResponse {
+  reply: string;
+  action: string;
+  schedule_id?: number | null;
+}
+
+export interface SiteAgentMessage {
+  id: number;
+  role: "user" | "agent";
+  content: string;
+  action?: string | null;
+  schedule_id?: number | null;
+  created_at: string;
 }

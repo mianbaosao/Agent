@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { initialTaskTraces, mockAgentEvents } from "@/data/mock-agent-traces";
 import type { AgentEvent, AgentLogEntry, ExecutionNode, TaskTrace } from "@/types/agent-observability";
 
 function appendLog(logs: AgentLogEntry[], log?: AgentLogEntry) {
@@ -28,6 +27,25 @@ function mergeNode(node: ExecutionNode, patch: Partial<ExecutionNode> & { id: st
 }
 
 function reduceEvent(tasks: TaskTrace[], event: AgentEvent) {
+  const exists = tasks.some((task) => task.id === event.taskId);
+  if (!exists && event.patch?.id && event.patch.nodes) {
+    const nextTask = {
+      id: event.patch.id,
+      name: event.patch.name ?? "Agent Task",
+      objective: event.patch.objective ?? "",
+      status: event.patch.status ?? "running",
+      currentNodeId: event.patch.currentNodeId,
+      currentToolName: event.patch.currentToolName,
+      startedAt: event.patch.startedAt ?? event.timestamp,
+      endedAt: event.patch.endedAt,
+      durationMs: event.patch.durationMs,
+      nodes: event.patch.nodes as ExecutionNode[],
+      logs: appendLog(event.patch.logs ?? [], event.log),
+      tags: event.patch.tags,
+    } as TaskTrace;
+    return [nextTask, ...tasks];
+  }
+
   return tasks.map((task) => {
     if (task.id !== event.taskId) return task;
 
@@ -51,39 +69,36 @@ function reduceEvent(tasks: TaskTrace[], event: AgentEvent) {
 }
 
 export function useAgentTraceStream() {
-  const [tasks, setTasks] = useState<TaskTrace[]>(initialTaskTraces);
-  const [activeTaskId, setActiveTaskId] = useState(initialTaskTraces[0]?.id);
-  const [connectionState, setConnectionState] = useState<"mock" | "connecting" | "connected" | "disconnected">("mock");
+  const [tasks, setTasks] = useState<TaskTrace[]>([]);
+  const [activeTaskId, setActiveTaskId] = useState<string | undefined>();
+  const [connectionState, setConnectionState] = useState<"connecting" | "connected" | "disconnected">("disconnected");
 
   useEffect(() => {
-    const wsUrl = process.env.NEXT_PUBLIC_AGENT_WS_URL;
+    const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000";
+    const wsUrl =
+      process.env.NEXT_PUBLIC_AGENT_WS_URL ??
+      apiBaseUrl.replace(/^http/, "ws").replace(/\/$/, "") + "/ws/agent-events";
 
     if (wsUrl) {
       setConnectionState("connecting");
       const socket = new WebSocket(wsUrl);
       socket.onopen = () => setConnectionState("connected");
-      socket.onclose = () => setConnectionState("disconnected");
-      socket.onerror = () => setConnectionState("disconnected");
+      socket.onclose = () => {
+        setConnectionState("disconnected");
+      };
+      socket.onerror = () => {
+        setConnectionState("disconnected");
+      };
       socket.onmessage = (message) => {
         const event = JSON.parse(message.data) as AgentEvent;
-        setTasks((current) => reduceEvent(current, event));
+        setTasks((current) => {
+          const next = reduceEvent(current, event);
+          setActiveTaskId((value) => value ?? next[0]?.id);
+          return next;
+        });
       };
       return () => socket.close();
     }
-
-    let index = 0;
-    const interval = window.setInterval(() => {
-      const event = mockAgentEvents[index];
-      if (!event) {
-        window.clearInterval(interval);
-        return;
-      }
-
-      setTasks((current) => reduceEvent(current, event));
-      index += 1;
-    }, 1650);
-
-    return () => window.clearInterval(interval);
   }, []);
 
   const activeTask = useMemo(

@@ -26,7 +26,7 @@ export function ExecutionSummary({ task, connectionState }: ExecutionSummaryProp
             </Badge>
             <span className="inline-flex items-center gap-1.5 rounded-md border border-[#e3b72f]/55 bg-[#fff2b8]/85 px-2 py-1 text-xs font-medium text-[#806018]">
               <Radio className="h-3.5 w-3.5" />
-              {connectionState === "mock" ? "Mock Stream" : connectionState}
+              {connectionState}
             </span>
             <Link
               href="/planner"

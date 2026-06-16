@@ -9,7 +9,7 @@ import { statusLabel } from "./status";
 
 interface TaskSidebarProps {
   tasks: TaskTrace[];
-  activeTaskId: string;
+  activeTaskId?: string;
   onSelectTask: (taskId: string) => void;
 }
 

@@ -1,6 +1,6 @@
 # AI Agent 可观测平台
 
-用于实时查看 AI Agent 执行全过程的全栈工程骨架。
+用于实时查看 AI Agent 执行全过程，并管理 AI 目标规划日程的全栈工程骨架。
 
 视觉方向：现代工程控制台的信息密度，结合装甲白、海军蓝、红色告警与黄色强调的机体配色语言。
 
@@ -23,19 +23,16 @@
 │   ├── src/hooks/use-agent-trace-stream.ts
 │   └── src/types/agent-observability.ts
 └── backend
-    ├── main.py                         # FastAPI 入口
-    ├── requirements.txt
-    └── app
-        ├── agent
-        │   ├── base_planner.py
-        │   ├── langchain_planner.py
-        │   ├── planner_factory.py
-        │   ├── prompt_template.py
-        │   ├── output_parser.py
-        │   └── rule_based_planner.py
-        ├── database.py
-        ├── models.py                   # Schedule 表
-        └── services/schedule_service.py
+    ├── pom.xml                         # Spring Boot 后端
+    └── src/main
+        ├── java/com/example/agentobservability
+        │   ├── controller              # Agent / Schedule REST API
+        │   ├── dto                     # 前端接口 DTO
+        │   ├── model                   # Schedule 表
+        │   ├── repository              # Spring Data JPA
+        │   ├── service                 # 规划、日程、种子数据
+        │   └── ws                      # WebSocket 实时事件
+        └── resources/application.yml
 ```
 
 ## 本地运行
@@ -47,27 +44,94 @@ npm run dev
 
 打开 [http://localhost:3000](http://localhost:3000)。
 
-默认前端使用 mock 实时事件。
-
-Python 后端启动：
+Java 后端启动：
 
 ```bash
 cd backend
-pip install -r requirements.txt
-uvicorn main:app --reload
+mvn spring-boot:run
 ```
 
-如果在项目根目录安装依赖，也可以使用根目录的 `requirements.txt`。
+## 本地后台运行
 
-环境变量配置：
+如果不想一直开 IDEA，可以先把后端打成 jar，然后用脚本后台启动前后端。
+
+后端构建：
 
 ```bash
-export OPENAI_API_KEY=sk-7c79b91e6ce34279ba9ec865e11212d1
-export OPENAI_BASE_URL=https://www.right.codes/codex/v1
-export OPENAI_MODEL=gpt-5.2
+./scripts/build-backend.sh
 ```
 
-未配置 `OPENAI_API_KEY` 时，后端会自动降级使用 `RuleBasedPlanner`，保证本地可以直接运行。
+如果本机没有 `mvn`，可以在 IDEA 里执行一次 Maven `package`，生成 `backend/target/*.jar`。
+
+开发模式后台启动前后端：
+
+```bash
+./scripts/start-local.sh
+```
+
+生产模式后台启动前后端：
+
+```bash
+./scripts/start-local-prod.sh
+```
+
+停止服务：
+
+```bash
+./scripts/stop-local.sh
+```
+
+查看状态：
+
+```bash
+./scripts/status-local.sh
+```
+
+查看日志：
+
+```bash
+./scripts/logs-local.sh all
+./scripts/logs-local.sh backend
+./scripts/logs-local.sh frontend
+```
+
+默认端口：
+
+- 前端：`http://localhost:3000`
+- 后端：`http://localhost:8000`
+
+可以临时指定端口：
+
+```bash
+FRONTEND_PORT=3001 BACKEND_PORT=8001 ./scripts/start-local.sh
+```
+
+后端默认运行在 [http://localhost:8000](http://localhost:8000)，前端默认会连接：
+
+- `POST /agent/plan`
+- `GET /schedules`
+- `GET /schedules/daily`
+- `POST /schedules`
+- `PUT /schedules/{id}`
+- `DELETE /schedules/{id}`
+- `ws://localhost:8000/ws/agent-events`
+
+本地数据库使用 MySQL：
+
+```text
+database: agent
+table: schedules
+host: localhost:3306
+user: root
+```
+
+启动时如果 `schedules` 表为空，后端会自动写入几条日程 mock 数据。表结构可参考 [backend/init_mysql.sql](/Users/heweitao/agent-Observability-platfrom/backend/init_mysql.sql)。
+
+健康检查：
+
+```bash
+curl http://localhost:8000/health
+```
 
 接口测试示例：
 
@@ -90,10 +154,6 @@ curl -X POST http://localhost:8000/agent/plan \
 - `ToolCall`
 - `ExecutionNode`
 
-后端 Agent 规划模块使用 LangChain LCEL：
+当前 Java 后端内置 `RuleBasedPlanner`，保证本地无外部模型配置也可以直接运行。
 
-```python
-prompt | llm | parser
-```
-
-`/agent/plan` 支持 `auto_save=false` 仅返回计划，`auto_save=true` 时会递归保存到 SQLite 的 `Schedule` 表，并通过 `parent_id` 维护父子关系。
+`/agent/plan` 支持 `auto_save=false` 仅返回计划，`auto_save=true` 时会递归保存到 MySQL 的 `Schedule` 表，并通过 `parent_id` 维护父子关系。同时会通过 WebSocket 推送 Agent 执行流程，供 Agent Observability 页面实时展示。

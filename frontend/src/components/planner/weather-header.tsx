@@ -17,15 +17,15 @@ export function WeatherHeader() {
       animate={{ opacity: 1, y: 0 }}
     >
       <div>
-        <div className="text-sm font-semibold text-[#2E4B36]">AI目标规划与日程管理系统</div>
-        <div className="mt-1 text-xs text-[#6D7B67]">每一次努力，都会在未来开花。</div>
+        <div className="text-sm font-semibold text-[#2E4B36]">面包屋</div>
+        <div className="mt-1 text-xs text-[#6D7B67]">KEEP GOING！！！</div>
       </div>
       <div className="flex flex-wrap items-center gap-3">
         <div className="flex items-center gap-2 rounded-md border border-[#BDE7FF] bg-[#EAF7FF] px-3 py-2">
           <Sun className="h-5 w-5 text-[#FFB74D]" />
           <div>
-            <div className="text-sm font-semibold text-[#23628B]">新加坡 26℃</div>
-            <div className="text-xs text-[#5D788A]">适合学习与散步</div>
+            <div className="text-sm font-semibold text-[#23628B]">北京海淀 26℃</div>
+            <div className="text-xs text-[#5D788A]">适合专注学习</div>
           </div>
         </div>
         <div className="flex items-center gap-2 rounded-md border border-[#F3E4A5] bg-[#FFF8D8] px-3 py-2 text-sm text-[#6E5318]">

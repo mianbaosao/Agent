@@ -6,6 +6,9 @@ frontend/tsconfig.tsbuildinfo
 .env
 .env.local
 target
+backend/target
+backend/data
 *.db
 .venv
 backend/.venv
+.local

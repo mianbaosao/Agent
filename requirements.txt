@@ -1,8 +1,0 @@
-fastapi
-uvicorn[standard]
-sqlalchemy
-pydantic
-langchain
-langchain-openai
-langchain-core
-langchain-community

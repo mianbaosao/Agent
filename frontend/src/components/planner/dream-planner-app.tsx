@@ -1,12 +1,13 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { AiPlannerView } from "./ai-planner-view";
 import { DashboardView } from "./dashboard-view";
+import { AgentTabView } from "./agent-tab-view";
 import { DreamSidebar } from "./dream-sidebar";
 import { GoalTreeView } from "./goal-tree-view";
 import { ScheduleTaskManager } from "./schedule-task-manager";
 import { StatsView } from "./stats-view";
+import { ToolsView } from "./tools-view";
 import { WeatherHeader } from "./weather-header";
 import { usePlannerStore } from "@/stores/planner-store";
 
@@ -27,13 +28,11 @@ export function DreamPlannerApp() {
               transition={{ duration: 0.22 }}
             >
               {activeView === "overview" && <DashboardView />}
-              {activeView === "yearly" && <GoalTreeView title="年度目标" />}
-              {activeView === "monthly" && <GoalTreeView title="月度规划" />}
-              {activeView === "weekly" && <GoalTreeView title="周计划" />}
+              {activeView === "yearly" && <GoalTreeView title="年度计划" />}
               {activeView === "today" && <TodayView />}
-              {activeView === "ai" && <AiPlannerView />}
               {activeView === "stats" && <StatsView />}
-              {activeView === "settings" && <SettingsView />}
+              {activeView === "tools" && <ToolsView />}
+              {activeView === "agent" && <AgentTabView />}
             </motion.div>
           </div>
         </div>
@@ -44,13 +43,4 @@ export function DreamPlannerApp() {
 
 function TodayView() {
   return <ScheduleTaskManager />;
-}
-
-function SettingsView() {
-  return (
-    <section className="rounded-md border border-[#E8F3E3] bg-white p-5 shadow-sm">
-      <h2 className="text-lg font-bold text-[#2E4B36]">设置</h2>
-      <p className="mt-2 text-sm text-[#6D7B67]">这里预留 API 地址、提醒时间、主题偏好等长期使用配置。</p>
-    </section>
-  );
 }
