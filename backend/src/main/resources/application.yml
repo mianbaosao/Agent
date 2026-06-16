@@ -1,0 +1,32 @@
+server:
+  port: 8000
+
+spring:
+  application:
+    name: agent-observability-backend
+  datasource:
+    url: jdbc:mysql://localhost:3306/agent?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&useSSL=false
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: he13140303042
+  sql:
+    init:
+      mode: always
+      continue-on-error: true
+  jpa:
+    hibernate:
+      ddl-auto: none
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: false
+
+logging:
+  level:
+    org.hibernate.SQL: warn
+
+site-agent:
+  openai:
+    api-key: sk-7c79b91e6ce34279ba9ec865e11212d1
+    base-url: https://www.right.codes/codex/v1
+    model: gpt-5.4-mini
