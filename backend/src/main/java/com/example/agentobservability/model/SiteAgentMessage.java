@@ -14,6 +14,8 @@ public class SiteAgentMessage {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+    @Column(name = "user_id", nullable = false)
+    private Integer userId = 1;
 
     @Column(nullable = false)
     private String role;
@@ -32,6 +34,8 @@ public class SiteAgentMessage {
     public Integer getId() {
         return id;
     }
+    public Integer getUserId() { return userId; }
+    public void setUserId(Integer userId) { this.userId = userId; }
 
     public String getRole() {
         return role;

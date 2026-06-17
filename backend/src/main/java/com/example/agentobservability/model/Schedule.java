@@ -13,6 +13,8 @@ public class Schedule {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+    @Column(name = "user_id", nullable = false)
+    private Integer userId = 1;
 
     @Column(name = "parent_id")
     private Integer parentId;
@@ -46,6 +48,8 @@ public class Schedule {
     public Integer getId() {
         return id;
     }
+    public Integer getUserId() { return userId; }
+    public void setUserId(Integer userId) { this.userId = userId; }
 
     public Integer getParentId() {
         return parentId;

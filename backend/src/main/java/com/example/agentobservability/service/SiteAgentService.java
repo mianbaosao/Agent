@@ -1,6 +1,7 @@
 package com.example.agentobservability.service;
 
 import com.example.agentobservability.dto.ScheduleRequest;
+import com.example.agentobservability.config.AuthContext;
 import com.example.agentobservability.dto.ScheduleResponse;
 import com.example.agentobservability.dto.SiteAgentMessageResponse;
 import com.example.agentobservability.dto.SiteAgentRequest;
@@ -62,7 +63,7 @@ public class SiteAgentService {
     }
 
     public List<SiteAgentMessageResponse> recentMessages() {
-        return messageRepository.findTop20ByOrderByCreatedAtDesc()
+        return messageRepository.findTop20ByUserIdOrderByCreatedAtDesc(AuthContext.userId())
             .stream()
             .sorted(Comparator.comparing(SiteAgentMessage::getCreatedAt).thenComparing(SiteAgentMessage::getId))
             .map(message -> new SiteAgentMessageResponse(
@@ -205,7 +206,7 @@ public class SiteAgentService {
     }
 
     private SiteAgentResponse deleteByTypeAndDate(String type, String title, LocalDate date, String reply) {
-        List<Schedule> candidates = scheduleRepository.findByTypeOrderByDueDateAscStartTimeAscSortOrderAscIdAsc(type)
+        List<Schedule> candidates = scheduleRepository.findByUserIdAndTypeOrderByDueDateAscStartTimeAscSortOrderAscIdAsc(AuthContext.userId(), type)
             .stream()
             .filter(item -> date.toString().equals(item.getDueDate()))
             .filter(item -> item.getTitle() != null && item.getTitle().contains(title))
@@ -273,7 +274,7 @@ public class SiteAgentService {
     }
 
     private List<Schedule> schedulesByTypeAndDate(String type, LocalDate date) {
-        return scheduleRepository.findByTypeOrderByDueDateAscStartTimeAscSortOrderAscIdAsc(type)
+        return scheduleRepository.findByUserIdAndTypeOrderByDueDateAscStartTimeAscSortOrderAscIdAsc(AuthContext.userId(), type)
             .stream()
             .filter(item -> date.toString().equals(item.getDueDate()))
             .sorted(Comparator.comparing((Schedule item) -> item.getStartTime() == null ? "99:99" : item.getStartTime())
@@ -431,6 +432,7 @@ public class SiteAgentService {
 
     private void saveMessage(String role, String content, String action, Integer scheduleId) {
         SiteAgentMessage message = new SiteAgentMessage();
+        message.setUserId(AuthContext.userId());
         message.setRole(role);
         message.setContent(content == null ? "" : content);
         message.setAction(action);

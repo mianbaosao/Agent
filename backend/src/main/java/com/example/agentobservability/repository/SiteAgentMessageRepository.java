@@ -6,4 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface SiteAgentMessageRepository extends JpaRepository<SiteAgentMessage, Integer> {
     List<SiteAgentMessage> findTop20ByOrderByCreatedAtDesc();
+    List<SiteAgentMessage> findTop20ByUserIdOrderByCreatedAtDesc(Integer userId);
 }

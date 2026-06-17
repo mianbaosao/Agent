@@ -12,6 +12,7 @@ DROP TABLE IF EXISTS schedules;
 
 CREATE TABLE schedules (
     id          INT           NOT NULL AUTO_INCREMENT,
+    user_id     INT           NOT NULL DEFAULT 1,
     parent_id   INT           DEFAULT NULL,
     goal        TEXT          DEFAULT NULL,
     level       VARCHAR(32)   DEFAULT NULL,
@@ -24,6 +25,7 @@ CREATE TABLE schedules (
     start_time  VARCHAR(32)   DEFAULT NULL,
 
     PRIMARY KEY (id),
+    INDEX idx_schedules_user_id (user_id),
     INDEX idx_parent_id  (parent_id),
     INDEX idx_type        (type),
     INDEX idx_status      (status),
@@ -40,17 +42,44 @@ DROP TABLE IF EXISTS tool_links;
 
 CREATE TABLE tool_links (
     id         INT          NOT NULL AUTO_INCREMENT,
+    user_id    INT          NOT NULL DEFAULT 1,
     group_id   VARCHAR(32)  NOT NULL,
     label      VARCHAR(255) NOT NULL,
     href       VARCHAR(512) NOT NULL,
     sort_order INT          NOT NULL DEFAULT 0,
 
     PRIMARY KEY (id),
+    INDEX idx_tool_links_user_id (user_id),
     INDEX idx_tool_links_group_id (group_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- -----------------------------------------------------------
--- 3. 插入种子数据（与 seed_mock_schedules 逻辑一致）
+-- 3. 用户与会话表
+-- -----------------------------------------------------------
+CREATE TABLE IF NOT EXISTS users (
+    id INT NOT NULL AUTO_INCREMENT,
+    account VARCHAR(20) NOT NULL,
+    password_hash VARCHAR(256) NOT NULL,
+    salt VARCHAR(64) NOT NULL,
+    role VARCHAR(32) NOT NULL DEFAULT 'user',
+    created_at DATETIME NOT NULL,
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_users_account (account)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS user_sessions (
+    id INT NOT NULL AUTO_INCREMENT,
+    user_id INT NOT NULL,
+    token VARCHAR(128) NOT NULL,
+    created_at DATETIME NOT NULL,
+    expires_at DATETIME NOT NULL,
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_user_sessions_token (token),
+    INDEX idx_user_sessions_user_id (user_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- -----------------------------------------------------------
+-- 4. 插入种子数据（与 seed_mock_schedules 逻辑一致）
 -- -----------------------------------------------------------
 
 -- 年度根节点  id=1

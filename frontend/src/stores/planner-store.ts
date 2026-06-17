@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-export type PlannerView = "overview" | "today" | "yearly" | "stats" | "tools" | "agent";
+export type PlannerView = "overview" | "today" | "yearly" | "health" | "stats" | "tools" | "agent";
 
 export interface AgentChatMessage {
   id: string;

@@ -2,6 +2,7 @@ package com.example.agentobservability.service;
 
 import com.example.agentobservability.dto.ToolLinkRequest;
 import com.example.agentobservability.dto.ToolLinkResponse;
+import com.example.agentobservability.config.AuthContext;
 import com.example.agentobservability.model.ToolLink;
 import com.example.agentobservability.repository.ToolLinkRepository;
 import jakarta.transaction.Transactional;
@@ -19,7 +20,7 @@ public class ToolLinkService {
     }
 
     public List<ToolLinkResponse> all() {
-        return repository.findAllByOrderByGroupIdAscSortOrderAscIdAsc()
+        return repository.findByUserIdOrderByGroupIdAscSortOrderAscIdAsc(AuthContext.userId())
             .stream()
             .map(this::toResponse)
             .toList();
@@ -28,6 +29,7 @@ public class ToolLinkService {
     @Transactional
     public ToolLinkResponse create(ToolLinkRequest request) {
         ToolLink link = new ToolLink();
+        link.setUserId(AuthContext.userId());
         link.setGroupId(request.groupId());
         link.setLabel(request.label());
         link.setHref(normalizeHref(request.href()));
@@ -39,6 +41,9 @@ public class ToolLinkService {
     public ToolLinkResponse update(Integer id, ToolLinkRequest request) {
         ToolLink link = repository.findById(id)
             .orElseThrow(() -> new IllegalArgumentException("Tool link not found: " + id));
+        if (!link.getUserId().equals(AuthContext.userId())) {
+            throw new IllegalArgumentException("Tool link not found: " + id);
+        }
         if (request.groupId() != null) {
             link.setGroupId(request.groupId());
         }
@@ -56,7 +61,11 @@ public class ToolLinkService {
 
     @Transactional
     public void delete(Integer id) {
-        repository.deleteById(id);
+        ToolLink link = repository.findById(id).orElseThrow();
+        if (!link.getUserId().equals(AuthContext.userId())) {
+            throw new IllegalArgumentException("Tool link not found: " + id);
+        }
+        repository.delete(link);
     }
 
     @EventListener(ApplicationReadyEvent.class)
@@ -85,6 +94,7 @@ public class ToolLinkService {
 
     private void seed(String groupId, String label, String href, int sortOrder) {
         ToolLink link = new ToolLink();
+        link.setUserId(AuthContext.userId());
         link.setGroupId(groupId);
         link.setLabel(label);
         link.setHref(href);

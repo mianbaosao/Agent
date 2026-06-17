@@ -6,4 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ToolLinkRepository extends JpaRepository<ToolLink, Integer> {
     List<ToolLink> findAllByOrderByGroupIdAscSortOrderAscIdAsc();
+    List<ToolLink> findByUserIdOrderByGroupIdAscSortOrderAscIdAsc(Integer userId);
 }

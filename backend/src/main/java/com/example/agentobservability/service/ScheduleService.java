@@ -1,5 +1,6 @@
 package com.example.agentobservability.service;
 
+import com.example.agentobservability.config.AuthContext;
 import com.example.agentobservability.dto.AgentPlanResponse;
 import com.example.agentobservability.dto.PlanNode;
 import com.example.agentobservability.dto.ScheduleRequest;
@@ -21,21 +22,21 @@ public class ScheduleService {
     }
 
     public List<ScheduleResponse> roots() {
-        return repository.findByParentIdIsNullOrderBySortOrderAscIdAsc()
+        return repository.findByUserIdAndParentIdIsNullOrderBySortOrderAscIdAsc(AuthContext.userId())
             .stream()
             .map(this::toTree)
             .toList();
     }
 
     public List<ScheduleResponse> daily() {
-        return repository.findByTypeOrderByDueDateAscStartTimeAscSortOrderAscIdAsc("daily")
+        return repository.findByUserIdAndTypeOrderByDueDateAscStartTimeAscSortOrderAscIdAsc(AuthContext.userId(), "daily")
             .stream()
             .map(schedule -> toResponse(schedule, List.of()))
             .toList();
     }
 
     public List<ScheduleResponse> weekly() {
-        return repository.findByTypeOrderByDueDateAscStartTimeAscSortOrderAscIdAsc("weekly")
+        return repository.findByUserIdAndTypeOrderByDueDateAscStartTimeAscSortOrderAscIdAsc(AuthContext.userId(), "weekly")
             .stream()
             .map(schedule -> toResponse(schedule, List.of()))
             .toList();
@@ -44,6 +45,7 @@ public class ScheduleService {
     @Transactional
     public ScheduleResponse create(ScheduleRequest request) {
         Schedule schedule = new Schedule();
+        schedule.setUserId(AuthContext.userId());
         applyCreate(schedule, request);
         return toTree(repository.save(schedule));
     }
@@ -52,6 +54,7 @@ public class ScheduleService {
     public ScheduleResponse update(Integer id, ScheduleRequest request) {
         Schedule schedule = repository.findById(id)
             .orElseThrow(() -> new IllegalArgumentException("Schedule not found: " + id));
+        requireOwner(schedule);
         if (request.title() != null) {
             schedule.setTitle(request.title());
         }
@@ -87,6 +90,7 @@ public class ScheduleService {
     @Transactional
     public ScheduleResponse savePlan(AgentPlanResponse plan) {
         Schedule root = new Schedule();
+        root.setUserId(AuthContext.userId());
         root.setGoal(plan.goal());
         root.setLevel(plan.level());
         root.setTitle(plan.goal());
@@ -151,14 +155,22 @@ public class ScheduleService {
     }
 
     private void deleteRecursive(Integer id) {
-        for (Schedule child : repository.findByParentIdOrderBySortOrderAscIdAsc(id)) {
+        for (Schedule child : repository.findByUserIdAndParentIdOrderBySortOrderAscIdAsc(AuthContext.userId(), id)) {
             deleteRecursive(child.getId());
         }
-        repository.deleteById(id);
+        Schedule schedule = repository.findById(id).orElseThrow();
+        requireOwner(schedule);
+        repository.delete(schedule);
+    }
+
+    private void requireOwner(Schedule schedule) {
+        if (!AuthContext.userId().equals(schedule.getUserId())) {
+            throw new IllegalArgumentException("Schedule not found: " + schedule.getId());
+        }
     }
 
     private ScheduleResponse toTree(Schedule schedule) {
-        List<ScheduleResponse> children = repository.findByParentIdOrderBySortOrderAscIdAsc(schedule.getId())
+        List<ScheduleResponse> children = repository.findByUserIdAndParentIdOrderBySortOrderAscIdAsc(AuthContext.userId(), schedule.getId())
             .stream()
             .map(this::toTree)
             .toList();
@@ -190,6 +202,7 @@ public class ScheduleService {
     private Schedule newSchedule(Integer parentId, String goal, String level, String title, String description,
                                  String type, int sortOrder, String status, String dueDate, String startTime) {
         Schedule schedule = new Schedule();
+        schedule.setUserId(AuthContext.userId());
         schedule.setParentId(parentId);
         schedule.setGoal(goal);
         schedule.setLevel(level);

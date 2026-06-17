@@ -13,6 +13,8 @@ public class ToolLink {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+    @Column(name = "user_id", nullable = false)
+    private Integer userId = 1;
 
     @Column(name = "group_id", nullable = false)
     private String groupId;
@@ -29,6 +31,8 @@ public class ToolLink {
     public Integer getId() {
         return id;
     }
+    public Integer getUserId() { return userId; }
+    public void setUserId(Integer userId) { this.userId = userId; }
 
     public String getGroupId() {
         return groupId;
