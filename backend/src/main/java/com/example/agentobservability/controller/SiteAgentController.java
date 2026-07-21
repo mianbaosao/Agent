@@ -7,13 +7,13 @@ import com.example.agentobservability.service.SiteAgentService;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 @RestController
+@CrossOrigin("*")
+
 public class SiteAgentController {
     private final SiteAgentService service;
 
